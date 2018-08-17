@@ -4,26 +4,26 @@ import sys
 import ctypes
 from subprocess import check_output
 from time import sleep
-yubiSerial="XXXXXXX"
+#yubiSerial="XXXXXXX"
 first=True
 startupinfo = subprocess.STARTUPINFO()
 startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
 
 while(1):
-    p = subprocess.Popen("ykneomgr.exe -s", stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=startupinfo)
+    p = subprocess.Popen("yubico-piv-tool.exe -a list-readers", stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=startupinfo)
     yubiRead, _ = p.communicate()
-    if "error" in str(yubiRead):
+    if "Failed" in str(yubiRead):
         yubiRead="ERROR"
     else:
-        yubiRead = re.sub('[^0-9]','', str(yubiRead))
+        yubiRead = str(yubiRead)
     print (yubiRead)
     
-    if(yubiRead!=yubiSerial):
+    if "Yubico Yubikey NEO" in yubiRead:
+	    print ("Yubikey found")
+    else:
         if(first):
             sys.exit(0)
         print ("locking")
         ctypes.windll.user32.LockWorkStation()
-    else:
-        print ("Yubikey found")
     first=False
     sleep(10)
